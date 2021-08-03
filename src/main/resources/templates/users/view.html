@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head(#{home.page.title})"></head>
+
+<body>
+
+<header th:replace="fragments/layout :: header"></header>
+
+<main class="container">
+
+    <h1 th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:text="#{nav.my.blogs}">My posts</h1>
+    <h1 th:if="!${#authorization.expression('hasRole(''ADMIN'')')}" th:text="#{nav.my.comments}">My posts</h1>
+    <hr>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <div class="thead-dark" th:each="post : ${post.content}"
+                     th:onclick="'location.href = \'/posts/' + ${post.id} + '/view\';'"
+                     th:if="${post.user.id} == ${#authentication.principal.id}">
+                    <table style="border: 2px solid forestgreen" class="table table-hover">
+                        <thead class="thead-success">
+                        <tr>
+                            <th th:text="${post.title}">Title</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <p style="font-size: 10px" th:text="${post.dateEdited}"></p>
+                    <hr>
+                </div>
+            </div>
+            <br>
+            <br>
+            <div th:if="!${#authorization.expression('hasRole(''ADMIN'')')}">
+                <div class="thead-dark" th:each="comment : ${comments}"
+                     th:onclick="'location.href = \'/posts/' + ${comment.blog.id} + '/view\';'"
+                     th:if="${comment.user.id} == ${#authentication.principal.id}">
+                    <table style="border: 2px solid forestgreen" class="table table-hover">
+                        <thead class="thead-success">
+                        <tr>
+                            <th th:text="${comment.blog.title}">Title</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${comment.content}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                </div>
+            </div>
+            <br>
+            <ul class="pagination justify-content-center" th:if="${post.totalPages > 1}">
+                <li class="page-item"
+                    th:classappend="${post.number == 0} ? disabled">
+                    <a class="page-link"
+                       th:href="@{/post(page=${post.number - 1}, size=${post.size})}">&lt;</a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, post.totalPages - 1)}"
+                    th:classappend="${i == post.number} ? active">
+                    <a class="page-link"
+                       th:href="@{/post(page=${i}, size=${post.size})}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item"
+                    th:classappend="${post.number == post.totalPages - 1} ? disabled">
+                    <a class="page-link"
+                       th:href="@{/posts(page=${post.number + 1}, size=${post.size})}">&gt;</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
