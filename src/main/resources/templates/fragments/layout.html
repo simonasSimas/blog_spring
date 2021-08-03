@@ -1,63 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
-  <meta charset="UTF-8">
-  <title th:text="*{title}"></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-          crossorigin="anonymous"></script>
-  <style>
-    body {
-      min-height: 75rem;
-      padding-top: 4.5rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title th:text="*{title}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+            crossorigin="anonymous"></script>
 </head>
-
 
 <body>
 
-<header>
-  <nav th:fragment="nav" class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" th:href="@{/home}">HW</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-              aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
-            <a class="nav-link" aria-current="page" th:href="@{/home}" th:classappend="${#request.getRequestURI().equals('/home')} ? active : inactive">Cars</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" th:href="@{/users}" th:classappend="${#request.getRequestURI().equals('/profile')} ? active : inactive">Users</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
-               aria-expanded="false" th:text="${#locale.toLanguageTag().toUpperCase()}">Dropdown</a>
-            <ul class="dropdown-menu" aria-labelledby="dropdown01">
-              <li><a class="dropdown-item" th:href="@{?lang=EN}"
-                     th:unless="${#locale.toLanguageTag().equals('en')}">EN</a></li>
-              <li><a class="dropdown-item" th:href="@{?lang=LT}"
-                     th:unless="${#locale.toLanguageTag().equals('lt')}">LT</a></li>
-              <li><a class="dropdown-item" th:href="@{?lang=CN}"
-                     th:unless="${#locale.toLanguageTag().equals('cn')}">CN</a></li>
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success"
+         style="padding-left: 300px; padding-right: 300px">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/posts}" th:text="#{nav.brand}">HW</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" th:href="@{/posts}"
+                           th:classappend="${#request.getRequestURI().equals('/posts')} ? active : inactive"
+                           th:text="#{nav.blogs}">Posts</a>
+                    </li>
+                    <li class="nav-item" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                        <a class="nav-link" th:href="@{/posts/create}"
+                           th:classappend="${#request.getRequestURI().equals('/posts/create')} ? active : inactive"
+                           th:text="#{nav.new.blog}">Post</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-bs-toggle="dropdown"
+                           aria-expanded="false" th:text="${#locale.toLanguageTag().toUpperCase()}">Dropdown</a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                            <li><a class="dropdown-item" th:href="@{?lang=EN}"
+                                   th:unless="${#locale.toLanguageTag().equals('en')}">EN</a></li>
+                            <li><a class="dropdown-item" th:href="@{?lang=LT}"
+                                   th:unless="${#locale.toLanguageTag().equals('lt')}">LT</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li sec:authorize="isAuthenticated()" class="nav-item" style="position: relative">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown"
+                       aria-expanded="false" sec:authentication="principal.fullName">Dropdown</a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdown01">
+                        <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                            <a class="dropdown-item" th:href="@{/users/view}"
+                               th:text="#{nav.my.blogs}">My posts</a>
+                        </li>
+                        <li th:if="!${#authorization.expression('hasRole(''ADMIN'')')}">
+                            <a class="dropdown-item" th:href="@{/users/view}"
+                               th:text="#{nav.my.comments}">My posts</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/logout}"
+                               th:text="#{log.out}">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+                <li sec:authorize="isAnonymous()" class="nav-item navbar-end">
+                    <a class="nav-link" th:href="@{/login}" th:text="#{log.in}">Log In</a>
+                </li>
+                <li sec:authorize="isAnonymous()" class="nav-item navbar-end">
+                    <a class="nav-link" th:href="@{/register}" th:text="#{register}">Log In</a>
+                </li>
             </ul>
-          </li>
-        </ul>
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="search">
-          <button class="btn btn-outline-success" type="submit" th:href="@{'/home?search=' + search.value}">
-            Search
-          </button>
-        </form>
-      </div>
-    </div>
-  </nav>
+        </div>
+    </nav>
 </header>
+
+<footer th:fragment="footer"></footer>
 
 </body>
 </html>
