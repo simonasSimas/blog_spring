@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head(#{home.page.title})"></head>
+
+<body>
+
+<header th:replace="fragments/layout :: header"></header>
+
+<main class="container">
+    <h1 th:text="#{home.page.title}">Home page</h1>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div th:each="post: ${post.content}"
+                 th:onclick="'location.href = \'/posts/' + ${post.id} + '/view\';'">
+                <table style="border: 2px solid forestgreen" class="table table-hover">
+                    <thead class="thead-success">
+                    <tr>
+                        <th th:text="${post.title}">Title</th>
+                    </tr>
+                    </thead>
+                </table>
+                <!--                    <p th:text="${#dates.format(${post.dateCreated}, 'yyyy-MM-dd HH:mm')}"></p>-->
+                <p style="font-size: 10px" th:text="${post.dateCreated}"></p>
+                <hr>
+            </div>
+            <ul class="pagination justify-content-center" th:if="${post.totalPages > 1}">
+                <li class="page-item"
+                    th:classappend="${post.number == 0} ? disabled">
+                    <a class="page-link"
+                       th:href="@{/posts(page=${post.number - 1}, size=${post.size})}">&lt;</a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, post.totalPages - 1)}"
+                    th:classappend="${i == post.number} ? active">
+                    <a class="page-link"
+                       th:href="@{/posts(page=${i}, size=${post.size})}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item"
+                    th:classappend="${post.number == post.totalPages - 1} ? disabled">
+                    <a class="page-link"
+                       th:href="@{/posts(page=${post.number + 1}, size=${post.size})}">&gt;</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

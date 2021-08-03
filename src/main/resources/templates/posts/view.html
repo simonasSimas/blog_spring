@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="fragments/layout :: head(${post.title})"></head>
+
+<body>
+
+<header th:replace="fragments/layout :: header"></header>
+
+<main class="container">
+    <h1 th:text="${post.title}">Title</h1>
+
+    <div th:if="${successMessage} != null">
+        <hr>
+        <div th:text="${successMessage}" class="alert alert-success" role="alert">
+            Post has been saved successfully!
+        </div>
+    </div>
+
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <textarea readonly style="background: white !important" id="postContent" name="content" class="form-control"
+                          rows="20"
+                          th:text="${post.contents}"
+                ></textarea>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <a th:href="@{/posts/{id}/edit(id = ${post.id})}" th:text="#{view.page.edit.button}"
+                   class="btn btn-success" >Edit</a>
+                <a th:href="@{/posts/{id}/delete(id = ${post.id})}" th:text="#{view.page.delete.button}"
+                   class="btn btn-outline-success">Cancel</a>
+            </div>
+        </div>
+    </div>
+    <br>
+    <hr>
+    <br>
+    <form method="POST" th:action="@{/comment/{id}/create(id = ${post.id})}" th:object="${comment}"
+          sec:authorize="isAuthenticated()">
+        <div class="form-group">
+            <label for="contentOfComment">
+                <strong th:text="#{comment.title}">Content></strong>
+            </label>
+            <textarea id="contentOfComment" name="contentOfComment" class="form-control"
+                      th:size="3" th:rows="2"
+                      th:field="${comment.content}"
+                      th:placeholder="#{comment.content}"
+                      th:errorclass="is-invalid">
+                    </textarea>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <input type="submit" class="btn btn-success" th:value="#{comment.button.save}">
+                    <a th:href="@{/posts/{id}/view(id = ${post.id})}" th:text="#{comment.button.cancel}"
+                       class="btn btn-outline-success">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <form th:each="existingComment : ${comments}" th:if="${existingComment.blog.id} == ${post.id}">
+                        <textarea readonly id="commentContent" name="content" class="form-control" th:size="3" th:rows="2"
+                                  th:text="${existingComment.content}"
+                        ></textarea>
+                        <br>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group" sec:authorize="isAuthenticated()"
+                                 th:if="${#authorization.expression('hasRole(''ADMIN'')')} or ${existingComment.user.id} == ${#authentication.principal.id}">
+                                <button th:text="#{comment.button.edit}" class="btn btn-success btn-sm"
+                                        th:href="@{/comment/{id}/edit(id=existingComment.id)}">Edit
+                                </button>
+                                <a th:text="#{comment.button.delete}" class="btn btn-outline-success btn-sm"
+                                   th:href="@{/comment/{id}/delete(id = ${existingComment.id})}">Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+</body>
+</html>
